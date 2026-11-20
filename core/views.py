@@ -7,6 +7,7 @@ from django.shortcuts import get_object_or_404, redirect, render
 from django.views.decorators.http import require_GET, require_POST
 from .forms import SignupForm, WorkForm
 from .models import Execution, Feedback, Prompt
+from .intelligence.pipeline import ClarificationRequired
 from .services import PROVIDERS, Provider, ProviderError, execute, generate
 logger = logging.getLogger(__name__)
 
@@ -27,16 +28,30 @@ def home(request):
 @login_required
 @require_POST
 def run(request):
-    form = WorkForm(request.POST)
-    mode = request.POST.get('mode')
+    posted = request.POST
+    if request.POST.get('mode') == 'clarify':
+        pending = request.session.get('pending_prompt')
+        if not pending:
+            return render(request, 'core/result.html', {'error': 'Sesi klarifikasi berakhir. Silakan mulai kembali.'})
+        posted = request.POST.copy()
+        for key, value in pending.items(): posted[key] = value
+        previous = pending.get('clarification', '')
+        answer = request.POST.get('clarification', '').strip()
+        posted['clarification'] = (previous + '\n' + answer).strip()
+    form = WorkForm(posted)
+    mode = posted.get('mode')
     if not form.is_valid() or mode not in ('generate', 'generate_execute', 'execute'):
         return render(request, 'core/result.html', {'error': 'Periksa masukan, provider, dan model. Instruksi maksimal 20.000 karakter.'}, status=200)
     data = form.cleaned_data
     try:
         provider = Provider(data['provider'], data['model'])
+        if bool(data['reviewer_provider']) != bool(data['reviewer_model']):
+            raise ProviderError('Isi provider dan model reviewer sekaligus.')
+        reviewer = Provider(data['reviewer_provider'], data['reviewer_model']) if data['reviewer_provider'] else provider
         prompt = None
         if mode != 'execute':
-            analysis, optimized, review = generate(provider, data['text'], data['custom_instructions'])
+            analysis, optimized, review = generate(provider, data['text'], data['custom_instructions'], reviewer, data['clarification'])
+            request.session.pop('pending_prompt', None)
             prompt = Prompt.objects.create(user=request.user, original=data['text'], optimized=optimized, analysis=analysis, review=review, provider=data['provider'], model=data['model'])
         else:
             optimized = data['text']
@@ -46,12 +61,15 @@ def run(request):
         if mode != 'generate':
             execution = Execution.objects.create(user=request.user, prompt=prompt, input_text=optimized, provider=data['provider'], model=data['model'], status='running')
             try:
-                raw, final, review_out, usage, latency = execute(provider, optimized, data['adapt'])
-                execution.raw_output, execution.final_output, execution.output_review, execution.usage, execution.latency_ms, execution.status = raw, final, review_out, usage, latency, 'completed'
+                raw, final, review_out, usage, latency = execute(provider, optimized, data['adapt'], reviewer)
+                execution.raw_output, execution.final_output, execution.output_review, execution.usage, execution.latency_ms, execution.status = raw, final, review_out, usage, latency, 'needs_review' if review_out.get('warning') else 'completed'
             except ProviderError as exc:
                 execution.status, execution.error = 'failed', str(exc)
             execution.save()
         return render(request, 'core/result.html', {'prompt': prompt, 'execution': execution})
+    except ClarificationRequired as exc:
+        request.session['pending_prompt'] = {key: posted.get(key, '') for key in ('text', 'provider', 'model', 'custom_instructions', 'reviewer_provider', 'reviewer_model', 'adapt', 'mode', 'clarification')}
+        return render(request, 'core/result.html', {'questions': exc.questions})
     except ProviderError as exc:
         return render(request, 'core/result.html', {'error': str(exc)})
 
@@ -88,7 +106,7 @@ def compare(request):
             item = Execution.objects.create(user=request.user, input_text=text, provider=name, model=model, status='running')
             try:
                 raw, final, review, usage, latency = execute(Provider(name, model), text, True)
-                item.raw_output, item.final_output, item.output_review, item.usage, item.latency_ms, item.status = raw, final, review, usage, latency, 'completed'
+                item.raw_output, item.final_output, item.output_review, item.usage, item.latency_ms, item.status = raw, final, review, usage, latency, 'needs_review' if review.get('warning') else 'completed'
             except ProviderError as exc:
                 item.status, item.error = 'failed', str(exc)
             item.save()

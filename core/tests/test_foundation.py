@@ -49,14 +49,16 @@ class ReviewLoopTests(SimpleTestCase):
             def __init__(self): self.calls = 0
             def complete(self, system, user, **kwargs):
                 self.calls += 1
-                if 'intent analyzer' in system: return Response('{"primary_goal":"test"}', {})
-                if 'Independently review' in system: return Response(json.dumps({'dimensions': {k: 100 for k in WEIGHTS}, 'critical_failure': True, 'missing':['constraint'], 'unsupported_assumptions':[], 'ambiguities':[]}), {})
+                if 'Analyze the user input' in system: return Response(json.dumps({'primary_goal':'test', 'input_language':'id', 'output_language':'id', 'constraints':[], 'expected_output':[], 'ambiguities':[]}), {})
+                if 'Extract context' in system: return Response(json.dumps({'domain':'test','audience':'unspecified','facts':[],'constraints':[]}), {})
+                if 'Design a prompt structure' in system: return Response(json.dumps({'objective':'test','sections':[],'constraints':[],'output_requirements':[]}), {})
+                if 'Review the prompt' in system: return Response(json.dumps({'dimensions': {k: 100 for k in WEIGHTS}, 'critical_failure': True, 'missing':['constraint'], 'unsupported_assumptions':[], 'ambiguities':[]}), {})
                 return Response('draft', {})
         p = FakeProvider()
         _, _, review = generate(p, 'test')
         self.assertTrue(review['warning'])
         self.assertEqual(review['revisions'], 2)
-        self.assertEqual(p.calls, 7)
+        self.assertEqual(p.calls, 9)
 
 class ComparisonTests(TestCase):
     def setUp(self):

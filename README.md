@@ -29,7 +29,7 @@ Buka http://127.0.0.1:8000/, daftar akun, lalu gunakan ruang kerja. `GET /health
 
 ## Alur kualitas
 
-Generator menganalisis instruksi, menyusun prompt, lalu melakukan tinjauan. Jika tinjauan menemukan kekurangan atau asumsi, maksimal dua revisi dilakukan. Skor berbobot adalah penilaian model yang bersifat eksperimental, bukan jaminan kualitas; kegagalan kritis tetap menghasilkan peringatan dan menghentikan eksekusi otomatis. Hasil eksekusi dapat diadaptasi ke Bahasa Indonesia dan ditinjau secara terpisah. Keduanya memakai model yang dipilih, sehingga bukan peninjauan independen dan perlu verifikasi manusia.
+Generator menganalisis instruksi, menyusun prompt, lalu melakukan tinjauan. Jika tinjauan menemukan kekurangan atau asumsi, maksimal dua revisi dilakukan. Skor berbobot adalah penilaian model yang bersifat eksperimental, bukan jaminan kualitas; kegagalan kritis tetap menghasilkan peringatan dan menghentikan eksekusi otomatis. Hasil eksekusi dapat diadaptasi ke Bahasa Indonesia dan ditinjau secara terpisah. Secara default keduanya memakai model yang sama; reviewer terpisah dapat dipilih, dan hasilnya tetap perlu verifikasi manusia.
 
 ## Pengujian
 
@@ -43,3 +43,15 @@ SQLite hanya untuk menjalankan tes terisolasi; aplikasi menggunakan PostgreSQL. 
 ## Batasan saat ini
 
 Permintaan berjalan sinkron; belum ada antrean, pembatalan, idempotensi, rate limiting, manajemen kunci per pengguna, versioning, API publik, dashboard benchmark, dataset evaluasi 100 contoh, atau pengukuran biaya. Perbandingan memproses model berurutan dan penghitungan penggunaan hanya mencakup respons eksekusi awal, tidak termasuk tahap generasi/review/adaptasi. Pengumpulan feedback belum digunakan untuk melatih atau mengubah model. Jangan menganggap skor AI sebagai bukti validasi benchmark atau jaminan akurasi. Tailwind Play CDN hanya untuk pengembangan; build CSS sendiri untuk produksi. Sebelum deployment, tambahkan hardening dan jalankan `python manage.py check --deploy` dengan pengaturan produksi yang sesuai.
+
+## Pipeline dan benchmark
+
+Pipeline memisahkan analisis intent, ekstraksi konteks, desain struktur, optimasi dan peninjauan. Setiap respons terstruktur diperiksa; ambiguitas akan meminta klarifikasi. Pilih provider dan model reviewer pada opsi reviewer jika ingin menggunakan model yang berbeda. Pemilihan ini tidak otomatis menjamin independensi penilaian. Review output memiliki quality gate `needs_review` dan pemeriksaan perubahan angka sederhana; perubahan format angka juga dapat memicu peringatan palsu. Pemeriksaan tersebut tidak membuktikan akurasi fakta maupun mempertahankan seluruh referensi.
+
+Kerangka benchmark tersedia dengan dua kasus contoh, **bukan dataset validasi 100 kasus**. Untuk menjalankannya dengan model eksekusi yang sama pada ketiga kondisi:
+
+```bash
+python manage.py benchmark_prompts --dataset evaluations/sample.json --output benchmark-results.json --provider openai --model gpt-4o-mini
+```
+
+Perintah memanggil API dan menimbulkan biaya, menyimpan prompt dan output, serta menyediakan kolom penilaian manusia yang masih kosong. Susun dan tinjau sekurangnya 100 kasus referensi sebelum menarik kesimpulan kualitas. Jangan commit hasil benchmark yang mengandung informasi sensitif.

@@ -13,4 +13,7 @@ class WorkForm(forms.Form):
     provider = forms.ChoiceField(choices=[(k, k.title()) for k in PROVIDERS])
     model = forms.CharField(max_length=120, initial='gpt-4o-mini', help_text='Masukkan model yang tersedia pada akun provider Anda.')
     custom_instructions = forms.CharField(required=False, max_length=3000, widget=forms.Textarea(attrs={'rows': 2}), label='Instruksi tambahan')
+    reviewer_provider = forms.ChoiceField(required=False, choices=[('', 'Sama dengan generator')] + [(k, k.title()) for k in PROVIDERS])
+    reviewer_model = forms.CharField(required=False, max_length=120)
+    clarification = forms.CharField(required=False, max_length=5000)
     adapt = forms.BooleanField(required=False, initial=True, label='Adaptasi hasil ke Bahasa Indonesia')
