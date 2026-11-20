@@ -1,6 +1,6 @@
 # PromptForge AI
 
-Aplikasi Django modular untuk menyusun prompt bahasa Inggris dari instruksi pengguna, meninjau hasil, mengeksekusi prompt melalui OpenAI, Anthropic atau Google Gemini, serta mengadaptasi hasil ke Bahasa Indonesia. Menggunakan PostgreSQL, HTMX, Alpine.js dan Tailwind CSS; tidak menggunakan Docker.
+Aplikasi Django modular untuk menyusun prompt bahasa Inggris dari instruksi pengguna, meninjau hasil, mengeksekusi prompt melalui OpenAI, Anthropic, Google Gemini, maupun Custom Provider (Ollama, Groq, DeepSeek, vLLM, OpenRouter, dll. yang kompatibel dengan protokol OpenAI), serta mengadaptasi hasil ke Bahasa Indonesia. Menggunakan PostgreSQL, HTMX, Alpine.js dan Tailwind CSS; tidak menggunakan Docker.
 
 ## Persiapan lokal
 
@@ -25,7 +25,7 @@ python manage.py migrate
 python manage.py runserver
 ```
 
-Buka http://127.0.0.1:8000/, daftar akun, lalu gunakan ruang kerja. `GET /health/` hanya memeriksa liveness, bukan koneksi PostgreSQL. Eksekusi dan perbandingan mengirim data ke provider dan dapat menimbulkan biaya. Setiap pengguna hanya dapat mengakses riwayatnya sendiri. Penghapusan akun akan menghapus riwayatnya.
+Buka http://127.0.0.1:8000/ dan langsung gunakan ruang kerja tanpa perlu login atau registrasi. `GET /health/` hanya memeriksa liveness, bukan koneksi PostgreSQL. Eksekusi dan perbandingan mengirim data ke provider dan dapat menimbulkan biaya. Semua prompt, eksekusi, dan riwayat dapat diakses langsung.
 
 ## Alur kualitas
 
