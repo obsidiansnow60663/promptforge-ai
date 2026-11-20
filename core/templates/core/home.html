@@ -1,0 +1,31 @@
+<!doctype html>
+<html lang="id">
+<head>
+  <meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>PromptForge AI</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.14.9/dist/cdn.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/htmx.org@2.0.4/dist/htmx.min.js"></script>
+</head>
+<body class="bg-slate-950 text-slate-100 antialiased">
+  <div class="mx-auto min-h-screen max-w-6xl px-6 sm:px-10">
+    <header class="flex items-center justify-between border-b border-slate-800 py-6">
+      <a href="/" class="flex items-center gap-3 font-semibold tracking-tight"><span class="grid h-9 w-9 place-items-center rounded-xl bg-indigo-500 text-lg">✦</span> PromptForge <span class="text-indigo-400">AI</span></a>
+      <span class="rounded-full border border-slate-700 px-3 py-1 text-xs text-slate-400">Fase fondasi</span>
+    </header>
+    <main class="grid gap-12 py-20 lg:grid-cols-2 lg:items-center lg:py-28">
+      <section>
+        <p class="mb-5 text-xs font-semibold uppercase tracking-[0.22em] text-indigo-400">Dari ide menuju instruksi yang jelas</p>
+        <h1 class="text-4xl font-semibold leading-tight tracking-tight sm:text-5xl">Ruang kerja untuk prompt yang lebih baik.</h1>
+        <p class="mt-6 max-w-lg text-lg leading-8 text-slate-400">PromptForge dirancang untuk mengubah instruksi Bahasa Indonesia menjadi prompt bahasa Inggris yang terstruktur, dengan maksud dan batasan tetap terjaga.</p>
+        <div class="mt-8 flex flex-wrap gap-3"><span class="rounded-lg bg-indigo-500 px-4 py-2.5 text-sm font-medium text-white">Fondasi siap dikembangkan</span><a href="/health/" class="rounded-lg border border-slate-700 px-4 py-2.5 text-sm text-slate-300 hover:border-slate-500">Lihat status layanan ↗</a></div>
+      </section>
+      <section class="rounded-2xl border border-slate-800 bg-slate-900 p-6 shadow-2xl shadow-black/20 sm:p-8" x-data="{open: false}">
+        <div class="flex items-center justify-between border-b border-slate-800 pb-5"><div><p class="text-xs uppercase tracking-widest text-slate-500">Alur yang direncanakan</p><h2 class="mt-2 text-lg font-semibold">Prompt Intelligence</h2></div><span class="text-2xl text-indigo-400">✦</span></div>
+        <ol class="mt-6 space-y-6 text-sm"><li class="flex gap-4"><span class="text-indigo-400">01</span><div><strong class="font-medium">Pahami instruksi</strong><p class="mt-1 text-slate-400">Identifikasi tujuan, konteks, dan batasan.</p></div></li><li class="flex gap-4"><span class="text-indigo-400">02</span><div><strong class="font-medium">Susun prompt</strong><p class="mt-1 text-slate-400">Terjemahkan dan optimalkan tanpa menambah asumsi.</p></div></li><li class="flex gap-4"><span class="text-indigo-400">03</span><div><strong class="font-medium">Tinjau kualitas</strong><p class="mt-1 text-slate-400">Periksa kembali kelengkapan dan maksud awal.</p></div></li></ol>
+        <button type="button" @click="open = !open" :aria-expanded="open.toString()" class="mt-8 text-sm font-medium text-indigo-400 hover:text-indigo-300">Tentang fase ini <span x-text="open ? '−' : '+'"></span></button><p x-show="open" x-cloak class="mt-3 text-sm leading-6 text-slate-400">Ini adalah fondasi aplikasi. Generator prompt, integrasi model, dan evaluasi akan dibangun pada fase berikutnya.</p>
+      </section>
+    </main>
+    <footer class="border-t border-slate-800 py-6 text-xs text-slate-500">PromptForge AI · Django + HTMX + Alpine.js + Tailwind CSS</footer>
+  </div><style>[x-cloak]{display:none!important}</style>
+</body></html>
